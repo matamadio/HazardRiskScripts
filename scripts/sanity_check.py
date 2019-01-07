@@ -241,7 +241,7 @@ if __name__ == '__main__':
     assert len(shp_files) > 0, "No shapefiles found!"
     assert len(haz_rasters) > 0, "No rasters found!"
 
-    stats_of_interest = "max min mean range sum"
+    stats_of_interest = "max min mean range count"
     adms_to_check = ["ADM0"]
 
     extract_stats(shp_files, haz_rasters, adms_to_check,

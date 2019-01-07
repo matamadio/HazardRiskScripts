@@ -36,6 +36,7 @@ from glob import glob
 from datetime import datetime
 import itertools as itools
 
+import numpy as np
 import pandas as pd
 import geopandas as gp
 from openpyxl import load_workbook
@@ -138,10 +139,11 @@ def extract_stats(shp_files, rst_files, adms_to_check,
                 nodata = src.nodatavals
                 transform = src.transform
                 rst_data = src.read(1)
+                rst_data = np.ma.masked_array(rst_data, mask=(rst_data == nodata))
                 rst_cache[rst] = {
                     'data': rst_data,
                     'transform': src.transform,
-                    'nodata': src.nodatavals
+                    'nodata': nodata
                 }
             # End with
         # End if

@@ -26,8 +26,8 @@ Requires python 3.6 and the following libraries (conda-forge):
 - geopandas
 - rasterio
 - rasterstats
-Make sure all layers are in crs wgs84.
-Assumes raster files are single band.
+Make sure all layers are in crs wgs84 and rasters are single band.
+The rasterstats analysis is based on the raster resolution.
 
 """
 import os
@@ -71,7 +71,9 @@ def extract_stats(shp_files, rst_files, adms_to_check,
     ==========
     * Excel File : `sanity_check_[datetime of run].xlsx`
     """
+    # combination of all the three items. * expands the list of inputs
     all_combinations = itools.product(*[shp_files, rst_files, adms_to_check])
+    # creates empty dictionaries
     shp_cache = {}
     rst_cache = {}
     for shp, rst, adm in all_combinations:
@@ -81,7 +83,7 @@ def extract_stats(shp_files, rst_files, adms_to_check,
 
         print("Processing", shp_name, sheet_name, adm)
 
-        # Get number from ADM string
+        # Get number from ADM level string
         adm_code_val = int(adm.strip('ADM'))
         adm_code = "{}_CODE".format(adm)
         adm_name = "{}_NAME".format(adm)
@@ -125,10 +127,12 @@ def extract_stats(shp_files, rst_files, adms_to_check,
                     continue
                 # End if
 
+# sort adm zones by ascending area size
             shp_data['area'] = shp_data.geometry.area
             shp_data = shp_data.sort_values('area')
             shp_cache[shp] = shp_data
 
+# keep raster in memory until we are done with it
         if rst in rst_cache:
             rst_data = rst_cache[rst]
             nodata = rst_cache['nodata']
@@ -148,6 +152,7 @@ def extract_stats(shp_files, rst_files, adms_to_check,
             # End with
         # End if
 
+        # shows progress
         try:
             _loop = tqdm(shp_data.index.unique())
         except NameError:
@@ -156,9 +161,9 @@ def extract_stats(shp_files, rst_files, adms_to_check,
             # Using shp_data.loc[adm_code, :] results in recursion error
             # when converting to JSON, so have to explicitly subset DF
             sel = shp_data.loc[shp_data.index == _admcode, :]
-
+            
+            # Combine (dissolve) areas with the same ADM code together
             if len(sel.index) > 1:
-                # Combine (dissolve) areas with the same ADM code together
                 sel = sel.dissolve(adm_code)
 
             curr_adm_name = sel.at[_admcode, adm_name]
@@ -169,6 +174,7 @@ def extract_stats(shp_files, rst_files, adms_to_check,
             except AttributeError:
                 pass
 
+            #creates dictionary of statistics for each individual adm unit
             stats = zonal_stats(sel, rst_data,
                                 affine=transform,
                                 stats=stats_of_interest,
@@ -176,6 +182,7 @@ def extract_stats(shp_files, rst_files, adms_to_check,
             stats = stats[0]
             stats_for_raster = {adm_name: curr_adm_name}
 
+            # checks for smaller administrative units than ADM0 and list them
             if adm_code_val > 0:
                 stats_for_raster['ADM0_CODE'] = shp_data.at[_admcode,
                                                             'ADM0_CODE']
@@ -226,7 +233,7 @@ if __name__ == '__main__':
     # convert to absolute path to avoid this issue
     abs_output = pathlib.Path(output_fn)
     abs_output = abs_output.absolute().resolve()
-    print("Outputting data to", abs_output.absolute().resolve())
+    print("Outputting data to", abs_output)
 
     # Shapefile for stats zones
     shp_file_pth = "../data/g2015_2014_0_upd270117"
@@ -241,6 +248,7 @@ if __name__ == '__main__':
     assert len(shp_files) > 0, "No shapefiles found!"
     assert len(haz_rasters) > 0, "No rasters found!"
 
+    # select statistics of interest and administrative units
     stats_of_interest = "max min mean range count"
     adms_to_check = ["ADM0"]
 

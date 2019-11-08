@@ -1,5 +1,5 @@
 """
-A question and answer approach to using schecker.py
+A question and answer approach to using HazardStats
 """
 
 import argparse

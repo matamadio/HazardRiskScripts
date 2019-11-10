@@ -169,6 +169,7 @@ def extract_stats(shp_files, rst_files, field,
         # Reset index name so it correctly appears when writing out to file
         df.index = df[field]
         df.index.name = field
+        df = df.drop(field, axis=1)
 
         # Write out dataframe to excel file
         try:

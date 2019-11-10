@@ -164,11 +164,12 @@ def extract_stats(shp_files, rst_files, field,
         df = pd.DataFrame(geostats)
 
         # Filter out rows with empty data
-        # df = df[(df.loc[:, stats_of_interest] > 0.0).any(axis=1)]
+        df = df[(df.loc[:, stats_of_interest] > 0.0).any(axis=1)]
 
         # Reset index name so it correctly appears when writing out to file
         df.index = df[field]
         df.index.name = field
+        df = df.drop(field, axis=1)
 
         # Write out dataframe to excel file
         try:

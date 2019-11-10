@@ -8,8 +8,8 @@ from hazardstat import extract_stats
 
 example_text = '''usage example:
 
- python schecker.py --field OBJECTID --stats min max --in_dir C:/temp
- python schecker.py --show C:/temp/shpfile.shp
+ python runstats.py --show C:/temp/shpfile.shp
+ python runstats.py --field OBJECTID --stats min max --in_dir C:\temp
 '''
 
 parser = argparse.ArgumentParser(description='Sanity check',
@@ -53,7 +53,7 @@ if __name__ == '__main__':
     # shpflename.stat.xlsx
 
     output_fn = "{}/{}.{}.xlsx".format(in_dir, 
-                                       shp_files[0].replace(in_dir, "").replace(".shp", "")
+                                       shp_files[0].replace(in_dir, "").replace(".shp", ""),
                                        "_".join(stats_to_calc))
 
     # openpyxl has trouble with relative paths

@@ -26,7 +26,8 @@ import geopandas as gpd
 from openpyxl import load_workbook
 
 import rasterio
-from rasterstats import zonal_stats
+
+from zonal_stats import zonal_stats
 
 try:
     # Optional package for progress bar
@@ -96,6 +97,8 @@ def extract_stats(shp_files, rst_files, field,
         _loop = tqdm(all_combinations)
     except NameError:
         _loop = all_combinations
+
+    shp_cache = {}
     for shp, rst in _loop:
         # Gets raster file name
         sheet_name = os.path.basename(rst)
@@ -107,9 +110,14 @@ def extract_stats(shp_files, rst_files, field,
         except AttributeError:
             pass
 
-        shp_data = gpd.read_file(shp)
-        shp_data['area'] = shp_data.geometry.area
-        shp_data = shp_data.sort_values('area')
+        if shp in shp_cache:
+            shp_data = shp_cache[shp]
+        else:
+            shp_data = gpd.read_file(shp)
+            # shp_data['area'] = shp_data.geometry.area
+            # shp_data = shp_data.sort_values('area')
+
+            shp_cache[shp] = shp_data
 
         if field not in shp_data.columns:
             print("Error: could not find {} in shapefile".format(field))
@@ -140,19 +148,26 @@ def extract_stats(shp_files, rst_files, field,
             rst_data = np.ma.masked_array(rst_data, mask=(rst_data == nodata))
         # End with
 
-        d_shp = shp_data.dissolve(by=field)
+        if len(shp_data[field]) != len(shp_data.index):
+            d_shp = shp_data.dissolve(by=field)
+        else:
+            d_shp = shp_data
+
         result = zonal_stats(d_shp, rst_data,
                              affine=transform,
                              stats=stats_of_interest,
                              nodata=nodata,
                              geojson_out=True)
         geostats = gpd.GeoDataFrame.from_features(result)
+
+        geostats = geostats.dropna()
         df = pd.DataFrame(geostats)
 
         # Filter out rows with empty data
-        df = df[(df.loc[:, stats_of_interest] > 0.0).any(axis=1)]
+        # df = df[(df.loc[:, stats_of_interest] > 0.0).any(axis=1)]
 
         # Reset index name so it correctly appears when writing out to file
+        df.index = df[field]
         df.index.name = field
 
         # Write out dataframe to excel file

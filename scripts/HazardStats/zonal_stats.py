@@ -169,7 +169,7 @@ def gen_zonal_stats(
 
         for feat in features_iter:
             if id(feat) in geom_cache:
-                (geom, geom_bounds, fsrc, rv_array) = geom_cache[id(feat)]
+                (geom, geom_bounds) = geom_cache[id(feat)]
             else:
                 geom = shape(feat['geometry'])
 
@@ -178,11 +178,12 @@ def gen_zonal_stats(
 
                 geom_bounds = tuple(geom.bounds)
 
-                fsrc = rast.read(bounds=geom_bounds)
+                geom_cache[id(feat)] = (geom, geom_bounds)
 
-                # rasterized geometry
-                rv_array = rasterize_geom(geom, like=fsrc, all_touched=all_touched)
-                geom_cache[id(feat)] = (geom, geom_bounds, fsrc, rv_array)
+            fsrc = rast.read(bounds=geom_bounds)
+
+            # rasterized geometry
+            rv_array = rasterize_geom(geom, like=fsrc, all_touched=all_touched)
 
             # nodata mask
             isnodata = (fsrc.array == fsrc.nodata)

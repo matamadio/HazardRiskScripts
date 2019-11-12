@@ -7,8 +7,8 @@ from hazardstat import extract_stats
 
 example_text = '''usage example:
 
- python schecker.py --field OBJECTID --stats min max --in_dir C:/temp
- python schecker.py --show C:/temp/shpfile.shp
+ python runstats.py --show C:/temp/shpfile.shp
+ python runstats.py --field OBJECTID --stats min max --in_dir C:\temp
 '''
 
 parser = argparse.ArgumentParser(description='Sanity check',

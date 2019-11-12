@@ -3,7 +3,6 @@ import pathlib
 from datetime import datetime
 from glob import glob
 
-
 from hazardstat import extract_stats
 
 example_text = '''usage example:
@@ -22,11 +21,8 @@ parser.add_argument('--field', type=str,
 parser.add_argument('--stats', type=str, nargs='+',
                     default=["max", "min", "mean", "range", "sum"],
                     help='Statistics to calculate (default: max min mean range sum)')
-parser.add_argument('--in_dir', type=str,
-                    help='An absolute path to the input directory')
-parser.add_argument('--prefix', type=str,
-                    default='',
-                    help='Prefix to add to output filename: [prefix]_sanity_check_[datetime of run]')
+parser.add_argument('--indir', type=str,
+                    help='Path to the input directory (preferably an absolute path)')
 
 if __name__ == '__main__':
     args = parser.parse_args()
@@ -45,15 +41,12 @@ if __name__ == '__main__':
 
     # Get hazard geotiff and shapefiles for stat zones
     # Shapefile for stats zones
-    in_dir = args.in_dir
-    haz_rasters = glob(in_dir + "/*.tif")
-    shp_files = glob(in_dir + "/*.shp")
+    indir = args.indir
+    haz_rasters = glob(indir + "/*.tif")
+    shp_files = glob(indir + "/*.shp")
 
-    in_dir
-    # shpflename.stat.xlsx
-
-    output_fn = "{}/{}.{}.xlsx".format(in_dir, 
-                                       shp_files[0].replace(in_dir, "").replace(".shp", ""),
+    output_fn = "{}/{}.{}.xlsx".format(indir, 
+                                       shp_files[0].replace(indir, "").replace(".shp", ""),
                                        "_".join(stats_to_calc))
 
     # openpyxl has trouble with relative paths

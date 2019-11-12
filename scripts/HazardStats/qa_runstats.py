@@ -1,10 +1,5 @@
-"""
-A question and answer approach to using HazardStats
-"""
-
-import argparse
+"""A question and answer approach to using HazardStats"""
 import pathlib
-from datetime import datetime
 from glob import glob
 import geopandas as gpd
 import os, sys

@@ -9,9 +9,10 @@ Script to run zonal statistics on batch rasters.
 USAGE
 - Have 1 shapefile to use for zonal extraction and 1 or more raster in a data folder.
 - THE SHAPEFILE AND THE RASTERS MUST ALL BE THE SAME PROJECTED (meters) CRS.
-- Run qa_runstats.py and answer the prompt questions. The tool will select autmatically the one shp and all rasters found in the folder. The ouput xlsx is generated in the data folder.
-- Use runstats.py for commandline execution (parallel processing)
-
+- Run qa_runstats.py and answer the prompt questions. 
+  The tool will select autmatically the one shp and all rasters found in the folder. 
+  The ouput xlsx is generated in the data folder.
+- Use runstats.py for direct commandline execution.
 """
 
 import rasterio
@@ -35,7 +36,7 @@ import os
 
 
 def filter_geometries(shp, rst):
-    """Check that raster and shpfile have matching CRS.
+    """Filter geometries to just those that overlay the given raster.
 
     Parameters
     ==========
@@ -56,6 +57,14 @@ def filter_geometries(shp, rst):
 
 
 def mp_calc_stats(in_data):
+    """Calculate given statistics and populate result dict.
+
+    Compatible with multiprocessing methods.
+
+    Parameters
+    ==========
+    * in_data : tuple, (Pandas row, str, rasterio object, list, dict)
+    """
     (row, field, ds, stats, result_set) = in_data
 
     clip, out_transform = mask(ds, [row.geometry], crop=True)

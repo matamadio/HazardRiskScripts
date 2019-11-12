@@ -31,13 +31,13 @@ if __name__ == '__main__':
         sys.exit()
 
     stats = ["max", "min", "mean", "range", "sum"]
-    stats_in = input("What statistics to calculate? (default: {}) ".format(stats))
+    stats_in = input("What statistics to extract? (default: {}) ".format(stats))
     if stats_in != "":
         stats = stats_in.split()
 
     rst_files = glob(in_dir+"/*.tif")
     
-    print("Calculating {} for {}, in {}".format(stats, 
+    print("Extracting {} for {}, in {}".format(stats, 
                                                 field, 
                                                 shp_file))
     print("and doing the above for the following rasters:")

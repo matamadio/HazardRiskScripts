@@ -23,7 +23,7 @@ if __name__ == '__main__':
     rst_fns = [str(pathlib.Path(fn).resolve()) for fn in glob("../../data/*.tif")]
 
     field = 'OBJECTID'
-    stats = ["min", "max"]
+    stats = ["min", "max", "mean"]
     with mp.Manager() as manager:
 
         # `d` is a DictProxy object shared between all processes
@@ -37,6 +37,8 @@ if __name__ == '__main__':
             procs = pool.starmap_async(apply_extract, file_combs)
             procs.get()
 
+        print("Writing results...")
         results = dict(d)
         for res, sht, cmt in results.values():
             write_to_excel(output_fn, res, sht, cmt)
+        print("Finished")

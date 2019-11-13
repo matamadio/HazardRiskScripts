@@ -45,6 +45,9 @@ if __name__ == '__main__':
     haz_rasters = glob(indir + "/*.tif")
     shp_files = glob(indir + "/*.shp")
 
+    assert len(shp_files) > 0, "No shapefiles found!"
+    assert len(haz_rasters) > 0, "No rasters found!"
+
     output_fn = "{}/{}.{}.xlsx".format(indir, 
                                        shp_files[0].replace(indir, "").replace(".shp", ""),
                                        "_".join(stats_to_calc))
@@ -54,9 +57,6 @@ if __name__ == '__main__':
     abs_output = pathlib.Path(output_fn)
     abs_output = abs_output.resolve()
     print("Outputting data to", abs_output)
-
-    assert len(shp_files) > 0, "No shapefiles found!"
-    assert len(haz_rasters) > 0, "No rasters found!"
 
     extract_stats(shp_files, haz_rasters, field_to_check,
                   stats_to_calc, abs_output)

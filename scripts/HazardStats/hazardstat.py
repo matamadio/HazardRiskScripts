@@ -184,10 +184,12 @@ def extract_stats(shp_files, rasters, field, stats, output_fn):
     all_combinations = itools.product(*[shp_files, rasters])
 
     shp_cache = {}
+    results = {}
     for shp_fn, rst_fn in all_combinations:
         if shp_fn in shp_cache:
             shp = shp_cache[shp_fn].copy()
         else:
+            shp_cache = {}  # clear cache
             shp = gpd.read_file(shp_fn)
             shp_cache[shp_fn] = shp.copy()
         # End if
@@ -197,7 +199,7 @@ def extract_stats(shp_files, rasters, field, stats, output_fn):
         sheet_name = os.path.basename(rst_fn)
         shp_name = os.path.basename(shp_fn)
 
-        print("Processing {} {} {}\n".format(shp_name, sheet_name, field))
+        print("\nProcessing {} {} {}".format(shp_name, sheet_name, field))
 
         crs_matches, issue = matching_crs(ds, shp)
         if not crs_matches:
@@ -226,9 +228,15 @@ def extract_stats(shp_files, rasters, field, stats, output_fn):
         stat_results[field] = stat_results.index
 
         res_shp = shp.merge(stat_results, on=field)
-
         comment = "# Extracted from {} using {}".format(sheet_name,
                                                         shp_name)
-        write_to_excel(output_fn, res_shp, sheet_name, comment)
+
+        results[(shp_fn, rst_fn)] = res_shp, sheet_name, comment
     # End for
+
+    for res, sht, cmt in results.values():
+        write_to_excel(output_fn, res, sht, cmt)
+
+
+
 # End extract_stats()

@@ -2,8 +2,9 @@ import argparse
 import pathlib
 from datetime import datetime
 from glob import glob
+import itertools as itools
 
-from hazardstat import extract_stats
+from hazardstat import (extract_stats, write_to_excel)
 
 example_text = '''usage example:
 
@@ -23,6 +24,49 @@ parser.add_argument('--stats', type=str, nargs='+',
                     help='Statistics to calculate (default: max min mean range sum)')
 parser.add_argument('--indir', type=str,
                     help='Path to the input directory (preferably an absolute path)')
+parser.add_argument('--ncores', type=int,
+                    default=1,
+                    help='Number of cores to use')
+
+
+def main(output_fn, **opts):
+    # openpyxl has trouble with relative paths
+    # convert to absolute path to avoid this issue
+    abs_output = pathlib.Path(output_fn)
+    abs_output = abs_output.resolve()
+    print("Outputting data to", abs_output)
+
+    ncores = opts['ncores']
+    shp_fns = opts['shp_fns']
+    rst_fns = opts['rst_fns']
+    field = opts['field']
+    stats = opts['stats']
+
+    if ncores > 1:
+        import multiprocess as mp
+        from hazardstat import apply_extract
+
+        with mp.Manager() as manager:
+            # `d` is a DictProxy object shared between all processes
+            # can be converted to dict for final write out
+            d = manager.dict()
+            with manager.Pool(processes=4) as pool:
+                # Map each shapefile to a single raster
+                # Then call apply_extract for each shp->raster combination
+                file_combs = itools.product(*[[d], shp_fns, rst_fns, [field], [stats]])
+                procs = pool.starmap_async(apply_extract, file_combs)
+                procs.get()
+
+            results = dict(d)
+    else:
+        results = extract_stats(shp_fns, rst_fns, field, stats)
+
+    print("Writing results...")
+    for data, sheet, comment in results.values():
+        write_to_excel(abs_output, data, sheet, comment)
+    # End for
+    print("Finished")
+# End main()
 
 if __name__ == '__main__':
     args = parser.parse_args()
@@ -42,21 +86,23 @@ if __name__ == '__main__':
     # Get hazard geotiff and shapefiles for stat zones
     # Shapefile for stats zones
     indir = args.indir
-    haz_rasters = glob(indir + "/*.tif")
-    shp_files = glob(indir + "/*.shp")
+    rst_fns = glob(indir + "/*.tif")
+    shp_fns = glob(indir + "/*.shp")
 
-    assert len(shp_files) > 0, "No shapefiles found!"
-    assert len(haz_rasters) > 0, "No rasters found!"
+    assert len(shp_fns) > 0, "No shapefiles found!"
+    assert len(rst_fns) > 0, "No rasters found!"
 
     output_fn = "{}/{}.{}.xlsx".format(indir, 
-                                       shp_files[0].replace(indir, "").replace(".shp", ""),
+                                       shp_fns[0].replace(indir, "").replace(".shp", ""),
                                        "_".join(stats_to_calc))
 
-    # openpyxl has trouble with relative paths
-    # convert to absolute path to avoid this issue
-    abs_output = pathlib.Path(output_fn)
-    abs_output = abs_output.resolve()
-    print("Outputting data to", abs_output)
+    ncores = args.ncores
+    opts = {
+        'rst_fns': rst_fns,
+        'shp_fns': shp_fns,
+        'field': field_to_check,
+        'stats': stats_to_calc,
+        'ncores': ncores,
+    }
 
-    extract_stats(shp_files, haz_rasters, field_to_check,
-                  stats_to_calc, abs_output)
+    main(output_fn, **opts)

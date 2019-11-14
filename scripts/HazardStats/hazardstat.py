@@ -198,8 +198,6 @@ def extract_stats(shp_files, rasters, field, stats):
         sheet_name = os.path.basename(rst_fn)
         shp_name = os.path.basename(shp_fn)
 
-        # print("\nProcessing {} {} {}".format(shp_name, sheet_name, field))
-
         crs_matches, issue = matching_crs(ds, shp)
         if not crs_matches:
             cmt = "Could not process {} with {}, incorrect CRS."\
@@ -234,4 +232,8 @@ def extract_stats(shp_files, rasters, field, stats):
 
     return results
 # End extract_stats()
+
+def apply_extract(d, shp, rst, field, stats):
+    from hazardstat import extract_stats
+    d.update(extract_stats([shp], [rst], field, stats))
     

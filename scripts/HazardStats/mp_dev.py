@@ -1,13 +1,10 @@
 from hazardstat import extract_stats
 
-def dummy(d, fns):
-    import os
-    pid = os.getpid()
-    d[pid] = "Hi, I was written by process {}".format(pid)
 
 def apply_extract(d, shp, rst, field, stats):
     from hazardstat import extract_stats
     d.update(extract_stats([shp], [rst], field, stats))
+
 
 if __name__ == '__main__':
     print("multiprocess dev")

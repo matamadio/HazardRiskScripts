@@ -4,7 +4,7 @@ from glob import glob
 import geopandas as gpd
 import os, sys
 
-from hazardstat import extract_stats
+from runstats import main
 
 
 if __name__ == '__main__':
@@ -30,13 +30,17 @@ if __name__ == '__main__':
     if stats_in != "":
         stats = stats_in.split()
 
-    rst_files = glob(in_dir+"/*.tif")
-    
-    print("Extracting {} for {}, in {}".format(stats, 
+    ncores = input("How many cores to use? (default: 1) ")
+    if ncores == '':
+        ncores = 1
+
+    rst_fns = glob(in_dir+"/*.tif")
+    print("Extracting {} for {}, in {} using {} cores\n".format(stats, 
                                                 field, 
-                                                shp_file))
+                                                shp_file,
+                                                ncores))
     print("and doing the above for the following rasters:")
-    print(rst_files)
+    print(rst_fns, '\n')
     confirm = input("Is this correct? (Y/N) ")
     if "n" in confirm.lower():
         print("Aborting!")
@@ -46,11 +50,11 @@ if __name__ == '__main__':
                                        shp_file.replace(in_dir, "").replace(".shp", ""),
                                        "_".join(stats))
 
-    # openpyxl has trouble with relative paths
-    # convert to absolute path to avoid this issue
-    abs_output = pathlib.Path(output_fn)
-    abs_output = abs_output.resolve()
-    print("Outputting data to", abs_output)
-
-    extract_stats([shp_file], rst_files, field,
-                  stats, abs_output)
+    opts = {
+        'rst_fns': rst_fns,
+        'shp_fns': [shp_file],
+        'field': field,
+        'stats': stats,
+        'ncores': ncores,
+    }
+    main(output_fn, **opts)

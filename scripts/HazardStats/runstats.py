@@ -50,7 +50,7 @@ def main(output_fn, **opts):
             # `d` is a DictProxy object shared between all processes
             # can be converted to dict for final write out
             d = manager.dict()
-            with manager.Pool(processes=4) as pool:
+            with manager.Pool(processes=ncores) as pool:
                 # Map each shapefile to a single raster
                 # Then call apply_extract for each shp->raster combination
                 file_combs = itools.product(*[[d], shp_fns, rst_fns, [field], [stats]])

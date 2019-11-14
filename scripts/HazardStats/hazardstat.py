@@ -167,7 +167,7 @@ def write_to_excel(output_fn, data, sheet_name, comment, msg=''):
 # End write_to_excel()
 
 
-def extract_stats(shp_files, rasters, field, stats, output_fn):
+def extract_stats(shp_files, rasters, field, stats):
     """Extract statistics from a raster using a shapefile.
 
     Writes results to the specified output file.
@@ -179,12 +179,11 @@ def extract_stats(shp_files, rasters, field, stats, output_fn):
     * field : str, name of column to use as primary id.
     * stats : List[str], of statistics to calculate. 
               Numpy compatible method names only.
-    * output_fn : str, additional message string to add
     """
     all_combinations = itools.product(*[shp_files, rasters])
 
-    shp_cache = {}
     results = {}
+    shp_cache = {}
     for shp_fn, rst_fn in all_combinations:
         if shp_fn in shp_cache:
             shp = shp_cache[shp_fn].copy()
@@ -199,14 +198,11 @@ def extract_stats(shp_files, rasters, field, stats, output_fn):
         sheet_name = os.path.basename(rst_fn)
         shp_name = os.path.basename(shp_fn)
 
-        print("\nProcessing {} {} {}".format(shp_name, sheet_name, field))
-
         crs_matches, issue = matching_crs(ds, shp)
         if not crs_matches:
             cmt = "Could not process {} with {}, incorrect CRS."\
                     .format(sheet_name, shp_name)
-            write_to_excel(output_fn, None, sheet_name, 
-                           cmt, issue)
+            results[(shp_fn, rst_fn)] = None, sheet_name, cmt
             continue
         # End if
 
@@ -234,9 +230,10 @@ def extract_stats(shp_files, rasters, field, stats, output_fn):
         results[(shp_fn, rst_fn)] = res_shp, sheet_name, comment
     # End for
 
-    for res, sht, cmt in results.values():
-        write_to_excel(output_fn, res, sht, cmt)
-
-
-
+    return results
 # End extract_stats()
+
+def apply_extract(d, shp, rst, field, stats):
+    from hazardstat import extract_stats
+    d.update(extract_stats([shp], [rst], field, stats))
+    

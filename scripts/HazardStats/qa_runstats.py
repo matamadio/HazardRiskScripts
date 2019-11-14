@@ -33,6 +33,8 @@ if __name__ == '__main__':
     ncores = input("How many cores to use? (default: 1) ")
     if ncores == '':
         ncores = 1
+    else:
+        ncores = int(ncores)
 
     rst_fns = glob(in_dir+"/*.tif")
     print("Extracting {} for {}, in {} using {} cores\n".format(stats, 

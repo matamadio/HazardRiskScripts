@@ -9,7 +9,7 @@ from hazardstat import (extract_stats, write_to_excel)
 example_text = '''usage example:
 
  python runstats.py --show C:/temp/shpfile.shp
- python runstats.py --field OBJECTID --stats min max --in_dir C:\temp
+ python runstats.py --field OBJECTID --stats min max --indir C:\temp
 '''
 
 parser = argparse.ArgumentParser(description='Sanity check',
@@ -62,9 +62,7 @@ def main(output_fn, **opts):
         results = extract_stats(shp_fns, rst_fns, field, stats)
 
     print("Writing results...")
-    for data, sheet, comment in results.values():
-        write_to_excel(abs_output, data, sheet, comment)
-    # End for
+    write_to_excel(abs_output, results)
     print("Finished")
 # End main()
 

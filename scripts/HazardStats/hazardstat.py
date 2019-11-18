@@ -124,16 +124,14 @@ def matching_crs(rst, shp_data):
 # End matching_crs()
 
 
-def write_to_excel(output_fn, data, sheet_name, comment, msg=''):
+def write_to_excel(output_fn, results):
     """Write data to a worksheet.
 
     Parameters
     ==========
     * output_fn : file pointer, pointer to raster file
-    * data : geopandas, shape data
-    * sheet_name : str, name of worksheet to add data to
-    * comment : str, comment to add to spreadsheet
-    * msg : str, additional message string to add
+    * results : dict[tuple], of statistic in 
+                (geopandas df, sheet_name (str), comment (str))
     """
     try:
         book = load_workbook(output_fn)
@@ -148,20 +146,19 @@ def write_to_excel(output_fn, data, sheet_name, comment, msg=''):
             writer.book = book
             writer.sheets = {ws.title: ws for ws in book.worksheets}
 
-        # write out data first
-        if data is not None:
-            data.to_excel(writer, sheet_name, startrow=2, index=False)
-        else:
-            df = pd.DataFrame()
-            df.to_excel(writer, sheet_name, startrow=2)
+        # data, sheet_name, comment, msg=''
+        for data, sheet, comment in results.values():
+            # write out data first
+            if data is not None:
+                data.to_excel(writer, sheet, startrow=2, index=False)
+            else:
+                df = pd.DataFrame()
+                df.to_excel(writer, sheet, startrow=2)
 
-        if comment != '':
-            # then add comment (sheet has to exist first, hence the write out above)
-            worksheet = writer.sheets[sheet_name]
-            worksheet.cell(row=1, column=1).value = comment
-
-            if msg != '':
-                worksheet.cell(row=2, column=1).value = msg
+            if comment != '':
+                # then add comment (sheet has to exist first, hence the write out above)
+                worksheet = writer.sheets[sheet]
+                worksheet.cell(row=1, column=1).value = comment
 
     # End with
 # End write_to_excel()

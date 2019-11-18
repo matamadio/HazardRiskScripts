@@ -10,10 +10,13 @@ from runstats import main
 if __name__ == '__main__':
     in_dir = input("Input directory to use? ")
     shp_file = glob(in_dir+"/*.shp")
-    if len(shp_file) > 1:
+    num_shp = len(shp_file)
+    if num_shp > 1:
         print("Found more than 1 shapefile! Aborting!")
         print(shp_file)
         sys.exit()
+    elif num_shp == 0:
+        sys.exit("No shapefile found!")
     shp_file = shp_file[0]
     shp_data = gpd.read_file(shp_file)
 

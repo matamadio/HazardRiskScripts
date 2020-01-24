@@ -91,7 +91,8 @@ def mp_calc_stats(in_data, preprocess=None):
             max_thres = (clip <= (avg + (sd * value)))
             clip = clip[min_thres & max_thres]
         elif kind == 'PC':
-            clip = np.percentile(clip, value)
+            p_threshold = np.percentile(clip, value)
+            clip = clip[clip <= p_threshold]
         # End if
     # End if
     

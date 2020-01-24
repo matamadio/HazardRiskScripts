@@ -31,8 +31,8 @@ There are two ways to use the script:
   -stats: the statistics to be calculated.
 
   -pre: the type of pre-processing filter to apply before statistics. Two options included:
-       SD: Standard deviations from the median. Specify a value >0 (e.g. SD 2 will filter out all values more than 2 SD from the mean)
-       PC: Percentile threshold. Specify a value between 0 and 100 (e.g. PC 80 will filter out all values above the 80 percentile)
+       SD: Standard deviations from the mean. Specify a value >0 (e.g. SD 2 will filter out all values more than 2 SD from the mean)
+       PC: Percentile distribution threshold. Specify a value between 0 and 100 (e.g. PC 80 will filter out all values above the 80 percentile)
   
   -ncores: the number of core to use. Typically use (total number - 1).
   

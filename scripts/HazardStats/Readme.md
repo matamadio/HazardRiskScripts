@@ -1,8 +1,7 @@
 HAZARDSTATS README
 ==================
 
-warmly needed by M. Amadio
-kindly delivered through the magic og Python coding by T. Iwanaga
+warmly needed by M. Amadio, kindly scripted by T. Iwanaga
 
 Script to run zonal statistics over rasters on batch, using parallel (multi-core) processing and threshold filtering using standard deviations or percentile clip.
 

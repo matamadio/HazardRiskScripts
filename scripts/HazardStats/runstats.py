@@ -85,10 +85,14 @@ if __name__ == '__main__':
     filtering = args.pre
 
     if filtering:
-        filtering = filtering.split(" ")
-        if len(filtering) < 2:
+        not_valid_len = len(filtering) != 2
+        not_valid_cmd = filtering[0] not in ['PC', 'SD']
+
+        if not_valid_len or not_valid_cmd:
             print("Unknown preprocessing command: {}".format(filtering))
             sys.exit(0)
+
+        filtering = (filtering[0], float(filtering[1]))
 
     print("Calculating {} for {}".format(stats_to_calc, field_to_check))
 

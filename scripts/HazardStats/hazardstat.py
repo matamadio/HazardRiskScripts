@@ -56,7 +56,7 @@ def filter_geometries(shp, rst):
 # End filter_geometries()
 
 
-def mp_calc_stats(in_data):
+def mp_calc_stats(in_data, preprocess=None):
     """Calculate given statistics and populate result dict.
 
     Compatible with multiprocessing methods.
@@ -64,6 +64,9 @@ def mp_calc_stats(in_data):
     Parameters
     ==========
     * in_data : tuple, (Pandas row, str, rasterio object, list, dict)
+    * preprocess : tuple[str, float], kind of preprocess with associated threshold value.
+                   ('SD', 2) : Filter values outside of 2 standard deviations
+                   ('PC', 80) : Filter values above 80th percentile
     """
     (row, field, ds, stats, result_set) = in_data
 
@@ -73,9 +76,24 @@ def mp_calc_stats(in_data):
     run_range = 'range' in stats
     if run_range:
         stats = [i for i in stats[:] if i != 'range']
-    
+
+    # Early exit if everything is NaN
     if np.isnan(clip).all():
         return
+
+    # Apply preprocess if necessary
+    if preprocess:
+        kind, value = preprocess
+        if kind == 'SD':
+            sd = clip.std()
+            avg = clip.mean()
+            min_thres = (clip >= (avg - (sd * value)))
+            max_thres = (clip <= (avg + (sd * value)))
+            clip = clip[min_thres & max_thres]
+        elif kind == 'PC':
+            clip = np.percentile(clip, value)
+        # End if
+    # End if
     
     del ds
     res = {func: float(getattr(clip, func)()) for func in stats}
@@ -164,7 +182,7 @@ def write_to_excel(output_fn, results):
 # End write_to_excel()
 
 
-def extract_stats(shp_files, rasters, field, stats):
+def extract_stats(shp_files, rasters, field, stats, preprocess=None):
     """Extract statistics from a raster using a shapefile.
 
     Writes results to the specified output file.
@@ -214,7 +232,7 @@ def extract_stats(shp_files, rasters, field, stats):
 
         result_set = {}
         for row in _loop:
-            mp_calc_stats((row, field, ds, stats, result_set))
+            mp_calc_stats((row, field, ds, stats, result_set), preprocess)
         # End for
 
         stat_results = pd.DataFrame.from_dict(result_set, orient='index')
@@ -223,6 +241,8 @@ def extract_stats(shp_files, rasters, field, stats):
         res_shp = shp.merge(stat_results, on=field)
         comment = "# Extracted from {} using {}".format(sheet_name,
                                                         shp_name)
+        if preprocess is not None:
+            comment += "\n# Preprocessed using {} : {}".format(*preprocess)
 
         results[(shp_fn, rst_fn)] = res_shp, sheet_name, comment
     # End for
@@ -230,7 +250,7 @@ def extract_stats(shp_files, rasters, field, stats):
     return results
 # End extract_stats()
 
-def apply_extract(d, shp, rst, field, stats):
+def apply_extract(d, shp, rst, field, stats, preprocess=None):
     from hazardstat import extract_stats
-    d.update(extract_stats([shp], [rst], field, stats))
+    d.update(extract_stats([shp], [rst], field, stats, preprocess))
     

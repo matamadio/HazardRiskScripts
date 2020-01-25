@@ -3,6 +3,7 @@ import pathlib
 from datetime import datetime
 from glob import glob
 import itertools as itools
+import sys
 
 from hazardstat import (extract_stats, write_to_excel)
 
@@ -75,7 +76,6 @@ if __name__ == '__main__':
 
     if args.show:
         import geopandas as gpd
-        import sys
         shp = gpd.read_file(args.show)
         print("Available fields:", list(shp.columns))
         sys.exit(0)

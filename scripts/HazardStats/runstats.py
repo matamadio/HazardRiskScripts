@@ -3,13 +3,14 @@ import pathlib
 from datetime import datetime
 from glob import glob
 import itertools as itools
+import sys
 
 from hazardstat import (extract_stats, write_to_excel)
 
 example_text = '''usage example:
 
  python runstats.py --show C:/temp/shpfile.shp
- python runstats.py --field OBJECTID --stats min max --ncores 3 --indir C:\temp
+ python runstats.py --field OBJECTID --stats min max --pre SD 2 --ncores 3 --indir C:\temp
 '''
 
 parser = argparse.ArgumentParser(description='Sanity check',
@@ -22,6 +23,9 @@ parser.add_argument('--field', type=str,
 parser.add_argument('--stats', type=str, nargs='+',
                     default=["max", "min", "mean", "range", "sum"],
                     help='Statistics to calculate (default: max min mean range sum)')
+parser.add_argument('--pre', type=str, nargs=2,
+                    default=None,
+                    help='Preprocess filtering (default: None)')
 parser.add_argument('--indir', type=str,
                     help='Path to the input directory (preferably an absolute path)')
 parser.add_argument('--ncores', type=int,
@@ -41,6 +45,7 @@ def main(output_fn, **opts):
     rst_fns = opts['rst_fns']
     field = opts['field']
     stats = opts['stats']
+    preprocess = opts['preprocess']
 
     if ncores > 1:
         import multiprocess as mp
@@ -53,13 +58,13 @@ def main(output_fn, **opts):
             with manager.Pool(processes=ncores) as pool:
                 # Map each shapefile to a single raster
                 # Then call apply_extract for each shp->raster combination
-                file_combs = itools.product(*[[d], shp_fns, rst_fns, [field], [stats]])
+                file_combs = itools.product(*[[d], shp_fns, rst_fns, [field], [stats], [preprocess]])
                 procs = pool.starmap_async(apply_extract, file_combs)
                 procs.get()
 
             results = dict(d)
     else:
-        results = extract_stats(shp_fns, rst_fns, field, stats)
+        results = extract_stats(shp_fns, rst_fns, field, stats, preprocess)
 
     print("Writing results...")
     write_to_excel(abs_output, results)
@@ -71,13 +76,23 @@ if __name__ == '__main__':
 
     if args.show:
         import geopandas as gpd
-        import sys
         shp = gpd.read_file(args.show)
         print("Available fields:", list(shp.columns))
         sys.exit(0)
 
     field_to_check = args.field
     stats_to_calc = args.stats
+    filtering = args.pre
+
+    if filtering:
+        not_valid_len = len(filtering) != 2
+        not_valid_cmd = filtering[0] not in ['PC', 'SD']
+
+        if not_valid_len or not_valid_cmd:
+            print("Unknown preprocessing command: {}".format(filtering))
+            sys.exit(0)
+
+        filtering = (filtering[0], float(filtering[1]))
 
     print("Calculating {} for {}".format(stats_to_calc, field_to_check))
 
@@ -90,9 +105,13 @@ if __name__ == '__main__':
     assert len(shp_fns) > 0, "No shapefiles found!"
     assert len(rst_fns) > 0, "No rasters found!"
 
+    stat_pp = "_".join(stats_to_calc)
+    if filtering:
+        stat_pp += "_" + "_".join(map(str, filtering))
+
     output_fn = "{}/{}.{}.xlsx".format(indir, 
                                        shp_fns[0].replace(indir, "").replace(".shp", ""),
-                                       "_".join(stats_to_calc))
+                                       stat_pp)
 
     ncores = args.ncores
     opts = {
@@ -100,6 +119,7 @@ if __name__ == '__main__':
         'shp_fns': shp_fns,
         'field': field_to_check,
         'stats': stats_to_calc,
+        'preprocess': filtering,
         'ncores': ncores,
     }
 

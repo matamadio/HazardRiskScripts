@@ -17,7 +17,9 @@ USAGE
 
 import rasterio
 from rasterio.mask import mask
+from rasterio.crs import CRS
 import shapely
+from fuzzywuzzy import fuzz
 
 import numpy as np
 import pandas as pd
@@ -123,18 +125,32 @@ def matching_crs(rst, shp_data):
                           and str for failure)
     """
     # Both vector and raster files have to have matching CRS
-    shp_crs = shp_data.crs['init']
-    rst_crs = rst.crs.to_string()
+    shp_str = shp_data.crs['init']
 
-    if "=" in rst_crs:
-        rst_crs = rst_crs.split("=")[1]
+    rst_crs = rst.crs
+    if rst_crs.is_epsg_code:
+        rst_str = rst_crs.to_string()
+        if "=" in rst_str:
+            rst_str = rst_str.split("=")[1]
 
-    crs_no_match = shp_crs.lower() != rst_crs.lower()
+        crs_no_match = shp_str.lower() != rst_str.lower()
+    else:
+        # ...could not identify EPSG code, relying on fuzzy matching of WKT...
+        rst_str = rst_crs.to_wkt()
+        shp_str = CRS.to_wkt(CRS.from_string(shp_str))
+
+        shp_str = shp_str.replace('[', '').replace(']', '')
+        rst_str = rst_str.replace('[', '').replace(']', '')
+
+        # WKT string has to be at least 70% similar...
+        crs_no_match = fuzz.token_sort_ratio(shp_str, rst_str) < 70
+    # End if
+
     if crs_no_match:
         # CRS does not match
         issue = "Issues:"
         issue += " Shapefile and raster have differing CRS."
-        issue += " shpfile: {}, raster: {}".format(shp_crs, rst_crs)
+        issue += " shpfile: {}, raster: {}".format(shp_str, rst_str)
         
         return (False, issue)
     # End if
@@ -216,8 +232,8 @@ def extract_stats(shp_files, rasters, field, stats, preprocess=None):
 
         crs_matches, issue = matching_crs(ds, shp)
         if not crs_matches:
-            cmt = "Could not process {} with {}, incorrect CRS."\
-                    .format(sheet_name, shp_name)
+            cmt = "Could not process {} with {}.\n{}"\
+                    .format(sheet_name, shp_name, issue)
             results[(shp_fn, rst_fn)] = None, sheet_name, cmt
             continue
         # End if

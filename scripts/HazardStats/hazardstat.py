@@ -252,6 +252,7 @@ def extract_stats(shp_files, rasters, field, stats, preprocess=None):
     return results
 # End extract_stats()
 
+
 def apply_extract(d, shp, rst, field, stats, preprocess=None):
     from hazardstat import extract_stats
     d.update(extract_stats([shp], [rst], field, stats, preprocess))

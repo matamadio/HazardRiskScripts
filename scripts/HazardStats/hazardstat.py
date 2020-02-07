@@ -79,6 +79,7 @@ def mp_calc_stats(in_data):
     
     del ds
     res = {func: float(getattr(clip, func)()) for func in stats}
+    res['count'] = np.count_nonzero(clip)
 
     if run_range:
         res['range'] = float(clip.max() - clip.min())
@@ -229,6 +230,7 @@ def extract_stats(shp_files, rasters, field, stats):
 
     return results
 # End extract_stats()
+
 
 def apply_extract(d, shp, rst, field, stats):
     from hazardstat import extract_stats

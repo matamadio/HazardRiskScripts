@@ -28,6 +28,8 @@ parser.add_argument('--pre', type=str, nargs=2,
                     help='Preprocess filtering (default: None)')
 parser.add_argument('--indir', type=str,
                     help='Path to the input directory (preferably an absolute path)')
+parser.add_argument('--ignore', type=float, nargs='+',
+                    help='Values to ignore in the rasters, space separated (e.g. -9999 -9999.99)')
 parser.add_argument('--ncores', type=int,
                     default=1,
                     help='Number of cores to use')
@@ -45,6 +47,7 @@ def main(output_fn, **opts):
     rst_fns = opts['rst_fns']
     field = opts['field']
     stats = opts['stats']
+    ignore = opts['ignore']
     preprocess = opts['preprocess']
 
     if ncores > 1:
@@ -58,7 +61,7 @@ def main(output_fn, **opts):
             with manager.Pool(processes=ncores) as pool:
                 # Map each shapefile to a single raster
                 # Then call apply_extract for each shp->raster combination
-                file_combs = itools.product(*[[d], shp_fns, rst_fns, [field], [stats], [preprocess]])
+                file_combs = itools.product(*[[d], shp_fns, rst_fns, [field], [stats], [ignore], [preprocess]])
                 procs = pool.starmap_async(apply_extract, file_combs)
                 procs.get()
 
@@ -83,6 +86,7 @@ if __name__ == '__main__':
     field_to_check = args.field
     stats_to_calc = args.stats
     filtering = args.pre
+    ignore = args.ignore
 
     if filtering:
         not_valid_len = len(filtering) != 2
@@ -120,6 +124,7 @@ if __name__ == '__main__':
         'field': field_to_check,
         'stats': stats_to_calc,
         'preprocess': filtering,
+        'ignore': ignore,
         'ncores': ncores,
     }
 

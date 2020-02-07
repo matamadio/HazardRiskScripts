@@ -63,15 +63,21 @@ def mp_calc_stats(in_data, preprocess=None):
 
     Parameters
     ==========
-    * in_data : tuple, (Pandas row, str, rasterio object, list, dict)
+    * in_data : tuple, (Pandas row, str, rasterio object, list, list, dict)
     * preprocess : tuple[str, float], kind of preprocess with associated threshold value.
                    ('SD', 2) : Filter values outside of 2 standard deviations
                    ('PC', 80) : Filter values above 80th percentile
     """
-    (row, field, ds, stats, result_set) = in_data
+    (row, field, ds, stats, ignore, result_set) = in_data
 
     clip, out_transform = mask(ds, [row.geometry], crop=True)
     clip = np.extract(clip != ds.nodata, clip)
+
+    if ignore is not None:
+        for ig in ignore:
+            clip = np.extract(clip != ig, clip)
+        # End for
+    # End if
 
     run_range = 'range' in stats
     if run_range:
@@ -184,7 +190,7 @@ def write_to_excel(output_fn, results):
 # End write_to_excel()
 
 
-def extract_stats(shp_files, rasters, field, stats, preprocess=None):
+def extract_stats(shp_files, rasters, field, stats, ignore=None, preprocess=None):
     """Extract statistics from a raster using a shapefile.
 
     Writes results to the specified output file.
@@ -196,6 +202,7 @@ def extract_stats(shp_files, rasters, field, stats, preprocess=None):
     * field : str, name of column to use as primary id.
     * stats : List[str], of statistics to calculate. 
               Numpy compatible method names only.
+    * ignore : List[float], of values to ignore.
     """
     all_combinations = itools.product(*[shp_files, rasters])
 
@@ -234,7 +241,7 @@ def extract_stats(shp_files, rasters, field, stats, preprocess=None):
 
         result_set = {}
         for row in _loop:
-            mp_calc_stats((row, field, ds, stats, result_set), preprocess)
+            mp_calc_stats((row, field, ds, stats, ignore, result_set), preprocess)
         # End for
 
         stat_results = pd.DataFrame.from_dict(result_set, orient='index')
@@ -253,7 +260,7 @@ def extract_stats(shp_files, rasters, field, stats, preprocess=None):
 # End extract_stats()
 
 
-def apply_extract(d, shp, rst, field, stats, preprocess=None):
+def apply_extract(d, shp, rst, field, stats, ignore=None, preprocess=None):
     from hazardstat import extract_stats
-    d.update(extract_stats([shp], [rst], field, stats, preprocess))
+    d.update(extract_stats([shp], [rst], field, stats, ignore, preprocess))
     

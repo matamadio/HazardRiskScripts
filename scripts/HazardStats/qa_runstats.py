@@ -46,6 +46,11 @@ if __name__ == '__main__':
             print("Make sure these are correct.")
             print("Examples of valid entries: PC 80 or SD 2")
             sys.exit()
+    
+    ignore = input("Any values to ignore? (space separated, leave blank if none) ") or None
+    if ignore:
+        ignore = ignore.split()
+        ignore = [float(v) for v in ignore]
 
     ncores = input("How many cores to use? (default: 1) ")
     if ncores == '':
@@ -82,6 +87,7 @@ if __name__ == '__main__':
         'field': field,
         'stats': stats,
         'ncores': ncores,
+        'ignore': ignore,
         'preprocess': filtering
     }
     main(output_fn, **opts)

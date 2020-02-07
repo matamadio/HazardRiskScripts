@@ -97,11 +97,12 @@ def mp_calc_stats(in_data, preprocess=None):
     # End if
     
     del ds
-    res = {func: float(getattr(clip, func)()) for func in stats}
-    res['count'] = np.count_nonzero(clip)
+    res = {func: float(getattr(np, func)(clip)) for func in stats}
 
     if run_range:
         res['range'] = float(clip.max() - clip.min())
+
+    res['count'] = clip.size
 
     if any(res.values()):
         idx = getattr(row, field)

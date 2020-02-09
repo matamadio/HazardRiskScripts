@@ -19,7 +19,7 @@ import rasterio
 from rasterio.mask import mask
 from rasterio.crs import CRS
 import shapely
-from fuzzywuzzy import fuzz
+import pyproj
 
 import numpy as np
 import pandas as pd
@@ -128,29 +128,18 @@ def matching_crs(rst, shp_data):
     shp_str = shp_data.crs['init']
 
     rst_crs = rst.crs
-    if rst_crs.is_epsg_code:
-        rst_str = rst_crs.to_string()
-        if "=" in rst_str:
-            rst_str = rst_str.split("=")[1]
-
-        crs_no_match = shp_str.lower() != rst_str.lower()
-    else:
-        # ...could not identify EPSG code, relying on fuzzy matching of WKT...
-        rst_str = rst_crs.to_wkt()
-        shp_str = CRS.to_wkt(CRS.from_string(shp_str))
-
-        shp_str = shp_str.replace('[', '').replace(']', '')
-        rst_str = rst_str.replace('[', '').replace(']', '')
-
-        # WKT string has to be at least 70% similar...
-        crs_no_match = fuzz.token_sort_ratio(shp_str, rst_str) < 70
-    # End if
+    rst_str = rst_crs.to_string()
+    
+    pyCRS = pyproj.crs.CRS
+    rst_epsg = pyCRS.from_user_input(rst_str).to_epsg()
+    shp_epsg = pyCRS.from_user_input(shp_str).to_epsg()
+    crs_no_match = rst_epsg != shp_epsg
 
     if crs_no_match:
         # CRS does not match
         issue = "Issues:"
-        issue += " Shapefile and raster have differing CRS."
-        issue += " shpfile: {}, raster: {}".format(shp_str, rst_str)
+        issue += " Shapefile and raster have differing EPSG."
+        issue += " shpfile: {}, raster: {}".format(shp_epsg, rst_epsg)
         
         return (False, issue)
     # End if

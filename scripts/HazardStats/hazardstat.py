@@ -17,7 +17,9 @@ USAGE
 
 import rasterio
 from rasterio.mask import mask
+from rasterio.crs import CRS
 import shapely
+import pyproj
 
 import numpy as np
 import pandas as pd
@@ -130,18 +132,21 @@ def matching_crs(rst, shp_data):
                           and str for failure)
     """
     # Both vector and raster files have to have matching CRS
-    shp_crs = shp_data.crs['init']
-    rst_crs = rst.crs.to_string()
+    shp_str = shp_data.crs['init']
 
-    if "=" in rst_crs:
-        rst_crs = rst_crs.split("=")[1]
+    rst_crs = rst.crs
+    rst_str = rst_crs.to_string()
+    
+    pyCRS = pyproj.crs.CRS
+    rst_epsg = pyCRS.from_user_input(rst_str).to_epsg()
+    shp_epsg = pyCRS.from_user_input(shp_str).to_epsg()
+    crs_no_match = rst_epsg != shp_epsg
 
-    crs_no_match = shp_crs.lower() != rst_crs.lower()
     if crs_no_match:
         # CRS does not match
         issue = "Issues:"
-        issue += " Shapefile and raster have differing CRS."
-        issue += " shpfile: {}, raster: {}".format(shp_crs, rst_crs)
+        issue += " Shapefile and raster have differing EPSG."
+        issue += " shpfile: {}, raster: {}".format(shp_epsg, rst_epsg)
         
         return (False, issue)
     # End if
@@ -224,8 +229,8 @@ def extract_stats(shp_files, rasters, field, stats, ignore=None, preprocess=None
 
         crs_matches, issue = matching_crs(ds, shp)
         if not crs_matches:
-            cmt = "Could not process {} with {}, incorrect CRS."\
-                    .format(sheet_name, shp_name)
+            cmt = "Could not process {} with {}.\n{}"\
+                    .format(sheet_name, shp_name, issue)
             results[(shp_fn, rst_fn)] = None, sheet_name, cmt
             continue
         # End if

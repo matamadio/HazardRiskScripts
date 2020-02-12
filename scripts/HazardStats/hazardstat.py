@@ -75,11 +75,19 @@ def mp_calc_stats(in_data, preprocess=None):
     clip, out_transform = mask(ds, [row.geometry], crop=True)
     clip = np.extract(clip != ds.nodata, clip)
 
+    if clip.size == 0:
+        # No data to process...
+        return
+
     if ignore is not None:
         for ig in ignore:
-            clip = np.extract(clip != ig, clip)
+            clip = np.extract(~np.isclose(clip, ig), clip)
         # End for
     # End if
+
+    if clip.size == 0:
+        # No data to process...
+        return
 
     run_range = 'range' in stats
     if run_range:
@@ -106,7 +114,7 @@ def mp_calc_stats(in_data, preprocess=None):
     
     del ds
     res = {func: float(getattr(clip, func)()) for func in stats}
-    res['count'] = np.count_nonzero(clip)
+    res['count'] = clip.size
 
     if run_range:
         res['range'] = float(clip.max() - clip.min())

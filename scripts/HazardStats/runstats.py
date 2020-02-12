@@ -13,6 +13,19 @@ example_text = '''usage example:
  python runstats.py --field OBJECTID --stats min max --pre SD 2 --ncores 3 --indir C:\temp
 '''
 
+
+def float_opt(value):
+    """Convert CLI input of string of floats into list of floats"""
+    values = value.split()
+    try:
+        values = list(map(float, values))
+    except Exception:
+        raise argparse.ArgumentError
+
+    return values
+# End float_opt()
+
+
 parser = argparse.ArgumentParser(description='Sanity check',
                                  epilog=example_text,
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
@@ -28,8 +41,8 @@ parser.add_argument('--pre', type=str, nargs=2,
                     help='Preprocess filtering (default: None)')
 parser.add_argument('--indir', type=str,
                     help='Path to the input directory (preferably an absolute path)')
-parser.add_argument('--ignore', type=float, nargs='+',
-                    help='Values to ignore in the rasters, space separated (e.g. -9999 -9999.99)')
+parser.add_argument('--ignore', type=float_opt, nargs='+',
+                    help='Values to ignore in the rasters as space separated string (e.g. "-9999 -9999.99")')
 parser.add_argument('--ncores', type=int,
                     default=1,
                     help='Number of cores to use')
@@ -67,12 +80,13 @@ def main(output_fn, **opts):
 
             results = dict(d)
     else:
-        results = extract_stats(shp_fns, rst_fns, field, stats, preprocess)
+        results = extract_stats(shp_fns, rst_fns, field, stats, ignore, preprocess)
 
     print("Writing results...")
     write_to_excel(abs_output, results)
     print("Finished")
 # End main()
+
 
 if __name__ == '__main__':
     args = parser.parse_args()
@@ -86,7 +100,7 @@ if __name__ == '__main__':
     field_to_check = args.field
     stats_to_calc = args.stats
     filtering = args.pre
-    ignore = args.ignore
+    ignore = args.ignore[0]
 
     if filtering:
         not_valid_len = len(filtering) != 2

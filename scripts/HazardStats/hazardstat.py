@@ -113,7 +113,7 @@ def mp_calc_stats(in_data, preprocess=None):
     # End if
     
     del ds
-    res = {func: float(getattr(clip, func)()) for func in stats}
+    res = {func: float(getattr(np, func)(clip)) for func in stats}
     res['count'] = clip.size
 
     if run_range:

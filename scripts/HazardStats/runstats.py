@@ -16,6 +16,8 @@ example_text = '''usage example:
 
 def float_opt(value):
     """Convert CLI input of string of floats into list of floats"""
+    if len(value) == 0:
+        return []
     values = value.split()
     try:
         values = list(map(float, values))
@@ -42,6 +44,7 @@ parser.add_argument('--pre', type=str, nargs=2,
 parser.add_argument('--indir', type=str,
                     help='Path to the input directory (preferably an absolute path)')
 parser.add_argument('--ignore', type=float_opt, nargs='+',
+                    default="",
                     help='Values to ignore in the rasters as space separated string (e.g. "-9999 -9999.99")')
 parser.add_argument('--ncores', type=int,
                     default=1,
@@ -100,7 +103,11 @@ if __name__ == '__main__':
     field_to_check = args.field
     stats_to_calc = args.stats
     filtering = args.pre
-    ignore = args.ignore[0]
+
+    try:
+        ignore = args.ignore[0]
+    except IndexError:
+        ignore = []
 
     if filtering:
         not_valid_len = len(filtering) != 2

@@ -24,7 +24,7 @@ There are two ways to use the script:
   
 - Use runstats.py for direct commandline execution, e.g.
 
-      python runstats.py --field OBJECTID --stats min max --pre SD 2 --ignore -9999 9999 0 --ncores 3 --indir C:\temp
+      python runstats.py --field OBJECTID --stats min max --pre SD 2 --ignore "-9999 9999 0 15.4" --ncores 3 --indir C:\temp
 
   - field: the attribute in the shapefile to identify zones. All features with the same field code will be counted together.
 
@@ -33,9 +33,8 @@ There are two ways to use the script:
   - pre: the type of pre-processing filter to apply before statistics. Two options included:
        - SD: Standard deviations from the mean. Specify a value >0 (e.g. SD 2 will filter out all values more than 2 SD from the mean)
        - PC: Percentile distribution threshold. Specify a value between 0 and 100 (e.g. PC 80 will filter out all values above the 80 percentile)
-   - ignore: values to be excluded from stats calcualtion. Provided as a list of values.
-  
-  
+   - ignore: values to be excluded from stats calcualtion. Provided as a list of values in quotes: "-9999 0 1.3"
+    
   - ncores: the number of core to use. Typically use (total number - 1).
   
   - indir: directory where input files are located (shp and tifs).

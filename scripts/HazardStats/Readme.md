@@ -24,11 +24,11 @@ There are two ways to use the script:
   
 - Use runstats.py for direct commandline execution, e.g.
 
-      python runstats.py --field OBJECTID --stats min max --pre SD 2 --ignore "-9999 9999 0 15.4" --ncores 3 --indir C:\temp
+      python runstats.py --field OBJECTID --stats median min max --pre SD 2 --ignore "-9999 9999 0 15.4" --ncores 3 --indir C:\temp
 
   - field: the attribute in the shapefile to identify zones. All features with the same field code will be counted together.
 
-  - stats: the statistics to be calculated. Allowed values: mean max min
+  - stats: the statistics to be calculated. Allows any stats supported by the numpy package.
 
   - pre: the type of pre-processing filter to apply before statistics. Two options included:
        - SD: Standard deviations from the mean. Specify a value >0 (e.g. SD 2 will filter out all values more than 2 SD from the mean)

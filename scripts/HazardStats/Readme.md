@@ -35,6 +35,6 @@ There are two ways to use the script:
        - PC: Percentile distribution threshold. Specify a value between 0 and 100 (e.g. PC 80 will filter out all values above the 80 percentile)
    - ignore: values to be excluded from stats calcualtion. Provided as a list of values in quotes: "-9999 0 1.3"
     
-  - ncores: the number of core to use. Typically use (total number - 1).
+  - ncores: the number of core to use. For best performances use total cores numbers - 1 (e.g. if you have a 8-cores, use 7).
   
   - indir: directory where input files are located (shp and tifs).

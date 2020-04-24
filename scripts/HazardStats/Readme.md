@@ -11,7 +11,7 @@ USAGE
 1. Prepare input
 
 - Put 1 shapefile to use for zonal extraction and 1 or more raster in a dedicated folder.
-- Be sure the shapefile and the rasters have the same PROJECTED (meters) CRS.
+- Be sure the shapefile and the rasters have the same CRS.
 
 2. Run script
 

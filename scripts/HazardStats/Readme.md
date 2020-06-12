@@ -33,7 +33,7 @@ There are two ways to use the script:
   - pre: the type of pre-processing filter to apply before statistics. Two options included:
        - SD: Standard deviations from the mean. Specify a value >0 (e.g. SD 2 will filter out all values more than 2 SD from the mean)
        - PC: Percentile distribution threshold. Specify a value between 0 and 100 (e.g. PC 80 will filter out all values above the 80 percentile)
-   - ignore: values to be excluded from stats calcualtion. Provided as a list of values in quotes: "-9999 0 1.3"
+   - ignore: values to be excluded from stats calcualtion. Provided as a list of values in quotes: "-9999 0 1.3" This argument is required; if there is no value to ignore, use --ignore ""
     
   - ncores: the number of core to use. For best performances use total cores numbers - 1 (e.g. if you have a 8-cores, use 7).
   

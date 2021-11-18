@@ -2,10 +2,10 @@
 title: 'HazardStats'
 tags:
   - Python
-  - astronomy
-  - dynamics
-  - galactic dynamics
-  - milky way
+  - spatial analysis
+  - zonal statistics
+  - natural hazards
+  - risk
 authors:
   - name: Mattia Amadio ^[co-first author] # note this makes a footnote saying 'co-first author'
     orcid: 0000-0003-0359-4230
@@ -29,15 +29,9 @@ aas-journal: Astrophysical Journal <- The name of the AAS journal.
 
 # Summary
 
-The forces on stars, galaxies, and dark matter under external gravitational
-fields lead to the dynamical evolution of structures in the universe. The orbits
-of these bodies are therefore key to understanding the formation, history, and
-future state of galaxies. The field of "galactic dynamics," which aims to model
-the gravitating components of galaxies to study their structure and evolution,
-is now well-established, commonly taught, and frequently used in astronomy.
-Aside from toy problems and demonstrations, the majority of problems require
-efficient numerical tools, many of which require the same base code (e.g., for
-performing numerical orbit integration).
+HazardStats is a python script based on  to run zonal statistics over rasters
+on batch, using parallel (multi-core) processing and threshold filtering according
+to standard deviations or percentile clip.
 
 # Statement of need
 
@@ -107,3 +101,5 @@ We acknowledge contributions from Brigitta Sipocz, Syrtis Major, and Semyeong
 Oh, and support from Kathryn Johnston during the genesis of this project.
 
 # References
+
+See paper.bib

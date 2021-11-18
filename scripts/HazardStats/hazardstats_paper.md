@@ -29,11 +29,22 @@ aas-journal: Astrophysical Journal <- The name of the AAS journal.
 
 # Summary
 
-HazardStats is a python script based on  to run zonal statistics over rasters
+`HazardStats` is a python script to run zonal statistics over multiple rasters
 on batch, using parallel (multi-core) processing and threshold filtering according
 to standard deviations or percentile clip.
 
 # Statement of need
+Zonal statistic is one of the key functions for running spatial assessment of
+hazard and risk. Both QGIS and ArcGIS can run zonal statistics, either natively
+or by using plugins. Either way, to run zonal statistics on large number of layers
+can be troublesome and slow by using these solutions.
+
+`HazardStats` is a python script designed for researchers and geoanalysts
+in the context of natural hazards and risk assessments.
+It aims at improving the processing of large number of layers while also allowing
+additional filtering of input data.
+It has been used in a number of academic studies and technical reports.
+
 
 `Gala` is an Astropy-affiliated Python package for galactic dynamics. Python
 enables wrapping low-level languages (e.g., C) for speed without losing
@@ -45,15 +56,6 @@ and chaos indicators for nonlinear dynamics. `Gala` also relies heavily on and
 interfaces well with the implementations of physical units and astronomical
 coordinate systems in the `Astropy` package [@astropy] (`astropy.units` and
 `astropy.coordinates`).
-
-`Gala` was designed to be used by both astronomical researchers and by
-students in courses on gravitational dynamics or astronomy. It has already been
-used in a number of scientific publications [@Pearson:2017] and has also been
-used in graduate courses on Galactic dynamics to, e.g., provide interactive
-visualizations of textbook material [@Binney:2008]. The combination of speed,
-design, and support for Astropy functionality in `Gala` will enable exciting
-scientific explorations of forthcoming data releases from the *Gaia* mission
-[@gaia] by students and experts alike.
 
 # Mathematics
 
@@ -94,11 +96,6 @@ and referenced from text using \autoref{fig:example}.
 
 Figure sizes can be customized by adding an optional second parameter:
 ![Caption for example figure.](figure.png){ width=20% }
-
-# Acknowledgements
-
-We acknowledge contributions from Brigitta Sipocz, Syrtis Major, and Semyeong
-Oh, and support from Kathryn Johnston during the genesis of this project.
 
 # References
 

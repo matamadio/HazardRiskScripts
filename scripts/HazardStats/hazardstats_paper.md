@@ -48,10 +48,10 @@ multi-processing.
 `HazardStats` is designed for researchers and geoanalysts in the context of natural hazards and
 risk assessments. It aims to improve "quality of life" by enabling the processing of large numbers
 of layers while also allowing additional filtering of input data. It consists of six core
-functions, use of which can be scripted. The primary use case, however, is through a simple
-"Question and Answer" style command-line interface, the final product of which is an Excel
-spreadsheet with the final result. `HazardStats` has been successfully used in a number of academic
-studies and technical reports.
+functions, use of which can be scripted, or directly applied via a command-line interface. The
+primary method of use, however, is through a simple "Question and Answer" style user interface, the
+final product of which is an Excel spreadsheet with the final result. `HazardStats` has been
+successfully used in a number of academic studies and technical reports.
 
 `HazardStats` is open-source (under the [something something] license) and leverages
 

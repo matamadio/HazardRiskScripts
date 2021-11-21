@@ -29,21 +29,35 @@ aas-journal: Astrophysical Journal <- The name of the AAS journal.
 
 # Summary
 
-`HazardStats` is a python script to run zonal statistics over multiple rasters
-on batch, using parallel (multi-core) processing and threshold filtering according
-to standard deviations or percentile clip.
+`HazardStats` is a program written in Python to calculate zonal statistics over multiple rasters
+using parallel (multi-core) processing and threshold filtering according to standard deviations or
+percentile clip.
 
 # Statement of need
-Zonal statistic is one of the key functions for running spatial assessment of
-hazard and risk. Both QGIS and ArcGIS can run zonal statistics, either natively
-or by using plugins. Either way, to run zonal statistics on large number of layers
-can be troublesome and slow by using these solutions.
+Zonal statistic is one of the key functions for running spatial assessment of hazard and
+risk. Popular desktop environments for spatial analysis, such as QGIS and ArcGIS, can perform
+zonal statistics, either natively or by using plugins, allowing analyses to be conducted by
+those otherwise unfamiliar with available programmatic approaches. Some degree of preprocessing
+is necessary for their efficient computational application. Common implementations require users
+to provide a vector dataset that defines the area of interest and that the extents are equal or
+similar to the raster layers being analyzed. Naively conducting zonal statistics can result in
+excessively long processing times. Manually preprocessing large datasets is often unrealistic or
+not ideal, particularly for those unaccustomed or inexperienced with programming or
+multi-processing.
 
-`HazardStats` is a python script designed for researchers and geoanalysts
-in the context of natural hazards and risk assessments.
-It aims at improving the processing of large number of layers while also allowing
-additional filtering of input data.
-It has been used in a number of academic studies and technical reports.
+`HazardStats` is designed for researchers and geoanalysts in the context of natural hazards and
+risk assessments. It aims to improve "quality of life" by enabling the processing of large numbers
+of layers while also allowing additional filtering of input data. It consists of six core
+functions, use of which can be scripted. The primary use case, however, is through a simple
+"Question and Answer" style command-line interface, the final product of which is an Excel
+spreadsheet with the final result. `HazardStats` has been successfully used in a number of academic
+studies and technical reports.
+
+`HazardStats` is open-source (under the [something something] license) and leverages
+
+rasterio (https://github.com/rasterio/rasterio)
+geopandas (https://github.com/geopandas/geopandas)
+openpyxl (https://foss.heptapod.net/openpyxl/openpyxl)
 
 
 `Gala` is an Astropy-affiliated Python package for galactic dynamics. Python
